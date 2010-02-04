@@ -1,13 +1,84 @@
-SessionTracker
-==============
+h2. SessionTracker
 
-Introduction goes here.
+SessionTracker is a rails plugin that provides a simple DSL for tracking when a
+user visits an action.
+
+This is primarily useful when you want to know how far a user progresses into
+your application and how long it takes them to reach certain features, or if they
+reach them at all.
+
+h2. Install It!
+
+@script/plugin install git://github.com/localocracy/session_tracker.git@
+
+h3. Create a migration for the trackers table
+
+@script/generate migration create_trackers@
+
+<pre><code>
+  class CreateTrackers < ActiveRecord::Migration
+  
+    def self.up
+      create_table :trackers do |t|
+        t.integer  :user_id   # required!
+        t.datetime :eaten_at
+        t.integer  :pizza_id
+      end
+    end
+    
+    def self.down
+      drop_table :trackers
+    end
+    
+  end
+</code></pre>
+
+h3. Add it to the controllers you want to track
+
+<pre><code>
+  class PizzaController < ApplicationController
+
+    track :eat, :with => :eaten_at
+
+    def eat
+      ...
+    end
+
+  end
+</code></pre>
+
+Or if you only want to track the action if @@pizza@ is valid, pass a symbol with
+the same name as the instance variable and SessionTracker will call @valid?@ on
+the object before setting @eaten_at@ to @Time.now@
+
+<pre><code>
+  class PizzaController < ApplicationController
+
+    track :eat, :with => :eaten_at, :object => :pizza
+    
+    ...
+    
+  end
+</code></pre>
+
+Lastly, you can track a foreign key to the object by simply passing more than
+one column name to the @:with@ option
+
+<pre><code>
+  class PizzaController < ApplicationController
+
+    track :eat, :with => [:eaten_at, :pizza_id], :object => :pizza
+    
+    ...
+    
+  end
+</code></pre>
+
+h2. Cheers!
+
+Let me know if you find any bugs or have any feature suggestions.
+
+Props to @be9/acl9@ for providing the design pattern that this plugin is based on.
 
 
-Example
-=======
-
-Example goes here.
-
-
-Copyright (c) 2010 [Aaron Soules], released under the MIT license
+Copyright (c) 2010 [Localocracy, Aaron Soules], released under the MIT license
